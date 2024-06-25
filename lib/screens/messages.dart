@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:chat_app/constants/others/const.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
-import 'package:path/path.dart';
 
 class Messages extends StatefulWidget {
   const Messages({super.key});
@@ -29,7 +28,7 @@ class _MessagesState extends State<Messages> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    // final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Constants.backgroundColor,

@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Need access to photo library in chat app</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Need access to camera in chat app</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Need access to microphone in chat app</string>
+	<!-- Added above permissions -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

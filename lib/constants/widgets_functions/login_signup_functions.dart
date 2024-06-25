@@ -20,24 +20,40 @@ class LoginSignupFunctions extends GetxController {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   //check logedin
-  Future<void> checkLogin() async {
+  Future<bool> checkLogin(AuthService authService) async {
     try {
       print("login information Checking running");
       final sp = await SharedPreferences.getInstance();
       print("islogedin: ${sp.getBool('isLogedin')}");
+      final email = sp.getString("email");
+      final password = sp.getString("password");
 
-      if (sp.getBool('isLogedin') == true) {
-        alreadyLogedin = true;
-        print(
-            "logedin : $alreadyLogedin Last User: ${sp.getString('LastUser')}");
-        rxUsername.value = sp.getString('LastUser')!;
-        Get.to(() => const HomeScreen());
+      if ((sp.getBool('isLogedin') == true)) {
+        print("--------------logedin : $alreadyLogedin");
+        print("--------------Last User: ${sp.getString('LastUser')}");
+        print("--------------Google Logedin: ${sp.getBool("GoogleLogin")}");
+        if (await isLoggedInWithGoogle() && sp.getBool("GoogleLogin") == true) {
+          alreadyLogedin = true;
+          rxUsername.value = sp.getString('LastUser')!;
+          Get.toNamed("homePage");
+          return true;
+        } else {
+          if (await authService.login(email!, password!)) {
+            alreadyLogedin = true;
+            rxUsername.value = sp.getString('LastUser')!;
+            Get.toNamed("homePage");
+            return true;
+          }
+        }
       } else {
         alreadyLogedin = false;
         print("logedin : $alreadyLogedin");
+        return false;
       }
+      return false;
     } catch (e) {
       print("Error: $e");
+      return false;
     }
   }
 
@@ -48,10 +64,12 @@ class LoginSignupFunctions extends GetxController {
       print("login function running");
       final sp = await SharedPreferences.getInstance();
 
-      if ((sp.getString(email) == password) ||
-          (await authService.login(email, password))) {
+      if (await authService.login(email, password)) {
         await sp.setBool('isLogedin', true);
         await sp.setString("LastUser", email);
+        await sp.setString("email", email);
+        await sp.setString("password", password);
+
         rxUsername.value = email;
         alreadyLogedin = true;
 
@@ -82,8 +100,9 @@ class LoginSignupFunctions extends GetxController {
 
       if (await authService.signup(email, password)) {
         if (await sp.setBool("isLogedin", true) &&
-            await sp.setString(email, password) &&
-            await sp.setString("LastUser", email)) {
+            await sp.setString("LastUser", email) &&
+            await sp.setString("email", email) &&
+            await sp.setString("password", password)) {
           rxUsername.value = email;
           alreadyLogedin = true;
           Get.offAllNamed("homePage");
@@ -170,7 +189,8 @@ class LoginSignupFunctions extends GetxController {
     return null;
   }
 
-  Future<bool> handleGoogleSignIn(StorageService storageServices, DatabaseService databaseServices, AuthService authService) async {
+  Future<bool> handleGoogleSignIn(StorageService storageServices,
+      DatabaseService databaseServices, AuthService authService) async {
     try {
       final sp = await SharedPreferences.getInstance();
       final userCredential = await signInWithGoogle();
@@ -198,10 +218,7 @@ class LoginSignupFunctions extends GetxController {
           print("--------------Download Url: $pfpicUrl :--------------");
           if (pfpicUrl != null) {
             await databaseServices.createUserProfile(
-              userProfile: UserProfile(
-                  uid: uid,
-                  name: name,
-                  pfpURL: pfpicUrl),
+              userProfile: UserProfile(uid: uid, name: name, pfpURL: pfpicUrl),
             );
           } else {
             throw Exception("Unable to Upload user profile picture");
@@ -245,6 +262,9 @@ class LoginSignupFunctions extends GetxController {
     }
   }
 
+  Future<bool> isLoggedInWithGoogle() async {
+    return await _googleSignIn.isSignedIn();
+  }
   // ________________________________________________________________________________ //
   // ________________________________________________________________________________ //
 }

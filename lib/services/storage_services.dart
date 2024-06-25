@@ -12,12 +12,27 @@ class StorageService {
     Reference fileReference = firebaseStorage
         .ref('users/pfpics')
         .child("$uid${path.extension(file.path)}");
-        
+
     UploadTask uploadTask = fileReference.putFile(file);
 
     return uploadTask.then((p) {
       if (p.state == TaskState.success) {
         return fileReference.getDownloadURL();
+      }
+      return null;
+    });
+  }
+
+  Future<String?> uploadImageToChat(
+      {required File file, required String chatId}) async {
+        
+    Reference fileRef = firebaseStorage.ref('chats/$chatId').child(
+        '${DateTime.now().toIso8601String()}${path.extension(file.path)}');
+    UploadTask uploadTask = fileRef.putFile(file);
+
+    return uploadTask.then((p) {
+      if (p.state == TaskState.success) {
+        return fileRef.getDownloadURL();
       }
       return null;
     });
