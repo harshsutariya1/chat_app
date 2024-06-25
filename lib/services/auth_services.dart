@@ -5,18 +5,30 @@ class AuthService {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  User? _user;
+  User? user;
 
-  User? get user {
-    return _user;
-  }
+
 
   Future<bool> login(String email, String password) async {
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
       if (credential.user != null) {
-        _user = credential.user;
+        user = credential.user;
+        return true;
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+    return false;
+  }
+
+  Future<bool> signup(String email, String password) async {
+    try {
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      if (credential.user != null) {
+        user = credential.user;
         return true;
       }
     } catch (e) {
@@ -28,7 +40,7 @@ class AuthService {
   Future<bool> logout() async {
     try {
       await _firebaseAuth.signOut();
-      _user = null;
+      user = null;
       return true;
     } catch (e) {
       print("Error: $e");

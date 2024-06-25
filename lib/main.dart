@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 Future<void> setup() async {
-  Get.put<LoginSignupFunctions>(LoginSignupFunctions());
   await setupFirebase();
   await registerServices();
 }
@@ -19,7 +18,6 @@ void main() async {
   await setup();
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});

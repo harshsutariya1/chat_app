@@ -2,6 +2,9 @@
 
 import 'dart:io';
 
+import 'package:chat_app/models/user_profile.dart';
+import 'package:chat_app/services/database_services.dart';
+import 'package:chat_app/services/storage_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
@@ -18,22 +21,32 @@ class LoginSignupScreen extends StatefulWidget {
 }
 
 class _LoginSignupScreenState extends State<LoginSignupScreen> {
+  final c = Get.find<LoginSignupFunctions>();
+  late AuthService _authService;
+  late MediaServices _mediaServices;
+  late StorageService _storageServices;
+  late DatabaseService _databaseServices;
+
+  final name = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   final rePassword = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
   File? selectedImage;
   bool isLoginPage = false;
   bool formvalidation = false;
-  final c = Get.find<LoginSignupFunctions>();
-  late AuthService _authService;
-  late MediaServices _mediaServices;
+  bool isLoadingLogin = false;
+  bool isLoadingSignup = false;
+  bool isLoadingGoogle = false;
 
   @override
   void initState() {
     // _authService = Get.find<AuthService>();
     _authService = GetIt.instance.get<AuthService>();
     _mediaServices = GetIt.instance.get<MediaServices>();
+    _storageServices = GetIt.instance.get<StorageService>();
+    _databaseServices = GetIt.instance.get<DatabaseService>();
     c.checkLogin();
     super.initState();
   }
@@ -54,11 +67,13 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return SafeArea(
         child: Scaffold(
       // resizeToAvoidBottomInset: false,
       body: Container(
-        height: double.infinity,
+        height: screenSize.height,
         color: const Color.fromARGB(147, 190, 230, 215),
         child: Form(
           key: _formKey,
@@ -66,51 +81,88 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             child: Column(
               children: [
                 (isLoginPage)
-                    ? const SizedBox()
-                    : Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 50),
-                        alignment: Alignment.centerLeft,
-                        child: const Text(
-                          "Let's Get going...",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                (isLoginPage)
-                    ? Image.asset("assets/Images/171_bgremoved.png")
-                    : GestureDetector(
-                        onTap: () async {
-                          File? file =
-                              await _mediaServices.getImageFromGallery();
-                          if (file != null) {
-                            setState(() {
-                              selectedImage = file;
-                            });
-                          }
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 40),
-                          // decoration: BoxDecoration(border: Border.all()),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            radius: MediaQuery.of(context).size.width * 0.17,
-                            child: CircleAvatar(
-                              radius: MediaQuery.of(context).size.width * 0.16,
-                              backgroundImage: (selectedImage != null)
-                                  ? FileImage(selectedImage!)
-                                  : (NetworkImage(Constants.PLACEHOLDER_PFP)
-                                      as ImageProvider),
+                    ? SizedBox(
+                        height: screenSize.height * 0.4,
+                        width: screenSize.width,
+                        child: Image.asset("assets/Images/171_bgremoved.png"),
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 40),
+                            alignment: Alignment.centerLeft,
+                            child: const Text(
+                              "Let's Get going...",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
                             ),
                           ),
-                        ),
+                          //Image Picker
+                          GestureDetector(
+                            onTap: () async {
+                              File? file =
+                                  await _mediaServices.getImageFromGallery();
+                              if (file != null) {
+                                setState(() {
+                                  selectedImage = file;
+                                });
+                              }
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              // decoration: BoxDecoration(border: Border.all()),
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius:
+                                    MediaQuery.of(context).size.width * 0.17,
+                                child: CircleAvatar(
+                                  radius:
+                                      MediaQuery.of(context).size.width * 0.16,
+                                  backgroundImage: (selectedImage != null)
+                                      ? FileImage(selectedImage!)
+                                      : (NetworkImage(Constants.PLACEHOLDER_PFP)
+                                          as ImageProvider),
+                                ),
+                              ),
+                            ),
+                          ),
+                          //Name field
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 20, top: 20),
+                            width: screenSize.width * 0.70,
+                            child: TextFormField(
+                              controller: name,
+                              decoration: const InputDecoration(
+                                labelText: "Enter Name",
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) {
+                                formValidation();
+                              },
+                              validator: (value) {
+                                RegExp nameRegExp =
+                                    Constants.NAME_VALIDATION_REGEX;
+                                if (value!.isEmpty) {
+                                  return 'Please enter Name';
+                                } else if (!nameRegExp.hasMatch(value)) {
+                                  return 'Enter valid name, i.e. John Smith';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                 // Email field
                 Container(
-                  margin: const EdgeInsets.only(bottom: 20, top: 20),
-                  width: 300,
+                  margin: const EdgeInsets.only(
+                    bottom: 20, /* top: 20*/
+                  ),
+                  width: screenSize.width * 0.70,
                   child: TextFormField(
                     controller: email,
                     decoration: const InputDecoration(
@@ -121,10 +173,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                       formValidation();
                     },
                     validator: (value) {
-                      RegExp finalRegExp = Constants.EMAIL_VALIDATION_REGEX;
+                      RegExp emailRegExp = Constants.EMAIL_VALIDATION_REGEX;
                       if (value!.isEmpty) {
                         return 'Please enter Email Address';
-                      } else if (!finalRegExp.hasMatch(
+                      } else if (!emailRegExp.hasMatch(
                               value) /*&&
                           isLoginPage == false*/
                           ) {
@@ -137,7 +189,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 //Password field
                 Container(
                   margin: const EdgeInsets.only(bottom: 20),
-                  width: 300,
+                  width: screenSize.width * 0.70,
                   child: TextFormField(
                     controller: password,
                     decoration: const InputDecoration(
@@ -149,10 +201,11 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                       formValidation();
                     },
                     validator: (value) {
-                      RegExp finalRegExp = Constants.PASSWORD_VALIDATION_REGEX;
+                      RegExp passwordRegExp =
+                          Constants.PASSWORD_VALIDATION_REGEX;
                       if (value!.isEmpty) {
                         return "Enter Password";
-                      } else if (!finalRegExp.hasMatch(value) &&
+                      } else if (!passwordRegExp.hasMatch(value) &&
                           isLoginPage == false) {
                         return 'Enter a valid Password!';
                       }
@@ -165,7 +218,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                   visible: !isLoginPage,
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 20),
-                    width: 300,
+                    width: screenSize.width * 0.70,
                     child: TextFormField(
                       controller: rePassword,
                       decoration: const InputDecoration(
@@ -189,8 +242,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 // Login Signup Container
                 Container(
                   margin: const EdgeInsets.only(bottom: 5),
-                  width: 300,
-                  height: 50,
+                  width: screenSize.width * 0.70,
+                  height: screenSize.height * 0.07,
                   child: Row(
                     children: [
                       //sigup button
@@ -206,15 +259,20 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.signpost_outlined),
-                            label: Text(
-                              "SignUp",
-                              style: TextStyle(
-                                fontWeight: (isLoginPage == true)
-                                    ? FontWeight.normal
-                                    : FontWeight.bold,
-                                fontSize: (isLoginPage == true) ? null : 20,
-                              ),
-                            ),
+                            label: (isLoadingSignup)
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : Text(
+                                    "SignUp",
+                                    style: TextStyle(
+                                      fontWeight: (isLoginPage == true)
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
+                                      fontSize:
+                                          (isLoginPage == true) ? null : 20,
+                                    ),
+                                  ),
                             onPressed: () async {
                               if (isLoginPage == true) {
                                 setState(() {
@@ -223,13 +281,46 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   rePassword.clear();
                                 });
                               } else {
-                                //it is signup page
-                                //save info function
-                                if (_formKey.currentState!.validate()) {
-                                  c.saveInfo(email.text, password.text);
+                                //it is signup page //save info function
+                                if ((_formKey.currentState!.validate()) &&
+                                    (selectedImage != null)) {
+                                  setState(() {
+                                    isLoadingSignup = true;
+                                  });
+
+                                  try {
+                                    bool result = await c.saveInfo(email.text,
+                                        password.text, _authService);
+                                    if (result) {
+                                      String? pfpicUrl = await _storageServices
+                                          .uploadUserPfpic(
+                                        file: selectedImage!,
+                                        uid: _authService.user!.uid,
+                                      );
+                                      print(
+                                          "--------------Download Url: $pfpicUrl :--------------");
+                                      if (pfpicUrl != null) {
+                                        await _databaseServices
+                                            .createUserProfile(
+                                          userProfile: UserProfile(
+                                              uid: _authService.user!.uid,
+                                              name: name.text,
+                                              pfpURL: pfpicUrl),
+                                        );
+                                      } else {
+                                        throw Exception(
+                                            "Unable to Upload user profile picture");
+                                      }
+                                    }
+                                    setState(() {
+                                      isLoadingSignup = result;
+                                    });
+                                  } catch (e) {
+                                    print("Error aii lya: $e");
+                                  }
                                 } else {
                                   Get.snackbar(
-                                      "Error", "Please enter valid details.");
+                                      "Error", "Unable to Register User!.");
                                 }
                               }
                             },
@@ -253,16 +344,21 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.login_outlined),
-                            label: Text(
-                              "Login",
-                              style: TextStyle(
-                                fontWeight: (isLoginPage == true)
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                fontSize: (isLoginPage == true) ? 20 : null,
-                              ),
-                            ),
-                            onPressed: () {
+                            label: (isLoadingLogin)
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : Text(
+                                    "Login",
+                                    style: TextStyle(
+                                      fontWeight: (isLoginPage == true)
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      fontSize:
+                                          (isLoginPage == true) ? 20 : null,
+                                    ),
+                                  ),
+                            onPressed: () async {
                               if (isLoginPage == false) {
                                 setState(() {
                                   isLoginPage = true;
@@ -273,8 +369,16 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 //it is login page
                                 //check info function
                                 if (_formKey.currentState!.validate()) {
-                                  c.loginInfo(
+                                  setState(() {
+                                    isLoadingLogin = true;
+                                  });
+
+                                  bool result = await c.loginInfo(
                                       email.text, password.text, _authService);
+
+                                  setState(() {
+                                    isLoadingLogin = result;
+                                  });
                                 } else {
                                   Get.snackbar("Error",
                                       "Username or Password are incorrect!");
@@ -289,10 +393,32 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 ),
                 //Google sign in button
                 ElevatedButton(
-                  onPressed: () {
-                    c.handleGoogleSignIn();
+                  onPressed: () async {
+                    setState(() {
+                      isLoadingGoogle = true;
+                    });
+
+                    bool result = await c.handleGoogleSignIn(
+                      _storageServices,
+                      _databaseServices,
+                      _authService,
+                    );
+
+                    setState(() {
+                      isLoadingGoogle = result;
+                    });
                   },
-                  child: const Text("Login With Google"),
+                  child: (isLoadingGoogle)
+                      ? SizedBox(
+                          width: screenSize.width * 0.3,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : const Text(
+                          "Login With Google",
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                 ),
               ],
             ),

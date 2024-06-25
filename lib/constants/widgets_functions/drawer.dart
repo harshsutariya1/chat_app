@@ -40,9 +40,6 @@ class _MyDrawerState extends State<MyDrawer> {
                   child: CircleAvatar(
                     radius: 100,
                     backgroundColor: Colors.white,
-                    // backgroundImage: AssetImage(
-                    //   "assets\\Images\\roulette_vector-Photoroom.png",
-                    // ),
                     child: CircleAvatar(
                       radius: 65,
                       backgroundColor: Colors.white,
@@ -71,8 +68,6 @@ class _MyDrawerState extends State<MyDrawer> {
               ],
             ),
             Expanded(
-              // child: Container(
-              //   decoration: BoxDecoration(border: Border.all()),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -123,36 +118,34 @@ class _MyDrawerState extends State<MyDrawer> {
                   const SizedBox(
                     height: 15,
                   ),
-                  Row(
-                    // mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      IconButton.filledTonal(
-                        onPressed: () {
-                          Get.changeTheme(ThemeData.light());
-                        },
-                        icon: const Icon(Icons.light_mode_outlined),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      IconButton.filled(
-                        onPressed: () {
-                          Get.changeTheme(ThemeData.dark());
-                        },
-                        icon: const Icon(Icons.dark_mode_outlined),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.start,
+                  //   children: [
+                  //     const SizedBox(
+                  //       width: 15,
+                  //     ),
+                  //     IconButton.filledTonal(
+                  //       onPressed: () {
+                  //         Get.changeTheme(ThemeData.light());
+                  //       },
+                  //       icon: const Icon(Icons.light_mode_outlined),
+                  //     ),
+                  //     const SizedBox(
+                  //       width: 10,
+                  //     ),
+                  //     IconButton.filled(
+                  //       onPressed: () {
+                  //         Get.changeTheme(ThemeData.dark());
+                  //       },
+                  //       icon: const Icon(Icons.dark_mode_outlined),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(
                     height: 15,
                   ),
                 ],
               ),
-              // ),
             ),
           ],
         ),
