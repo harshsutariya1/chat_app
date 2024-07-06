@@ -131,6 +131,7 @@ class AuthService {
 
           // Handle signed-in user (e.g., navigate to a new screen)
           // Get.off(() => const HomeScreen());
+          this.user = userCredential?.user;
           Get.offAllNamed("messages");
           print('Signed in as: ${user.displayName}');
           Get.snackbar(
@@ -196,7 +197,7 @@ class AuthService {
       sp.clear();
       print("After clearing sharedPreferences: ${sp.getKeys()}");
       await _googleSignIn.signOut();
-      await FirebaseAuth.instance.signOut();
+      await _firebaseAuth.signOut();
       await sp.setBool("GoogleLogin", false);
       // Get.offAll(() => const LoginSignupScreen());
       Get.offAllNamed("loginSignupPage");

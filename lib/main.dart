@@ -24,22 +24,6 @@ Future<void> setup() async {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  // checkLogin() {
-  //   return StreamBuilder<User?>(
-  //     stream: FirebaseAuth.instance.authStateChanges(),
-  //     builder: (BuildContext context, AsyncSnapshot snapshot) {
-  //       if (snapshot.hasData) {
-  //         // User is signed in
-  //         return const Messages();
-  //       } else {
-  //         // User is not signed in
-  //         return const LoginSignupScreen();
-  //       }
-  //     },
-  //   );
-  // }
-
-  // final controller = Get.find<LoginSignupFunctions>();
   final AuthService _authService = GetIt.instance.get<AuthService>();
 
   final routes = {
