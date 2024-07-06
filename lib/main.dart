@@ -1,28 +1,46 @@
-import 'package:chat_app/constants/widgets_functions/login_signup_functions.dart';
+// import 'package:chat_app/constants/widgets_functions/login_signup_functions.dart';
 import 'package:chat_app/screens/Chat_App/chat_app_tabbar.dart';
 import 'package:chat_app/screens/api_screen_1.dart';
 import 'package:chat_app/screens/home.dart';
 import 'package:chat_app/screens/login_signup.dart';
 import 'package:chat_app/screens/messages.dart';
+import 'package:chat_app/services/auth_services.dart';
 import 'package:chat_app/utills.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-Future<void> setup() async {
-  await setupFirebase();
-  await registerServices();
-}
 
 void main() async {
   await setup();
   runApp(MyApp());
 }
 
+Future<void> setup() async {
+  await setupFirebase();
+  await registerServices();
+}
+
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  final controller = Get.find<LoginSignupFunctions>();
+  // checkLogin() {
+  //   return StreamBuilder<User?>(
+  //     stream: FirebaseAuth.instance.authStateChanges(),
+  //     builder: (BuildContext context, AsyncSnapshot snapshot) {
+  //       if (snapshot.hasData) {
+  //         // User is signed in
+  //         return const Messages();
+  //       } else {
+  //         // User is not signed in
+  //         return const LoginSignupScreen();
+  //       }
+  //     },
+  //   );
+  // }
+
+  // final controller = Get.find<LoginSignupFunctions>();
+  final AuthService _authService = GetIt.instance.get<AuthService>();
 
   final routes = {
     'homePage': (context) => const HomeScreen(),
@@ -42,7 +60,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
-      home: const LoginSignupScreen(),
+      // home: const LoginSignupScreen(),
+      home: _authService.checkLogin(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:chat_app/constants/widgets_functions/chat_tile.dart';
+import 'package:chat_app/constants/widgets_functions/drawer.dart';
 import 'package:chat_app/models/user_profile.dart';
 import 'package:chat_app/screens/chat_page.dart';
 import 'package:chat_app/services/auth_services.dart';
@@ -28,12 +29,12 @@ class _MessagesState extends State<Messages> {
 
   @override
   Widget build(BuildContext context) {
-    // final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Constants.backgroundColor,
       appBar: _appBar(),
       body: _body(),
+      drawer: const MyDrawer(),
     );
   }
 

@@ -74,8 +74,8 @@ class LoginSignupFunctions extends GetxController {
         alreadyLogedin = true;
 
         Get.offAllNamed("homePage");
-
         Get.snackbar("Welcome $email", "Login Successfull!");
+        
         print(sp.getKeys());
         return true;
       } else {

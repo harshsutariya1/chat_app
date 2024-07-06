@@ -1,11 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+// import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:chat_app/constants/others/const.dart';
 import 'package:chat_app/services/auth_services.dart';
-import 'login_signup_functions.dart';
+// import 'login_signup_functions.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -16,7 +16,7 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-  final controller = Get.find<LoginSignupFunctions>();
+  // final controller = Get.find<LoginSignupFunctions>();
   late AuthService _authService;
 
   @override
@@ -51,11 +51,10 @@ class _MyDrawerState extends State<MyDrawer> {
                 Card(
                   child: SizedBox(
                     width: double.infinity,
-                    // height: 40,
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                        "Username: ${controller.rxUsername}",
+                        "Username: ${_authService.user!.email}",
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 20,
@@ -96,7 +95,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     child: ListTile(
                       onTap: () {
                         print("logout button pressed!");
-                        controller.logoutDilog(_authService);
+                        _authService.logoutDilog();
                       },
                       title: const Text("Logout"),
                       leading: const SizedBox(),
@@ -109,7 +108,7 @@ class _MyDrawerState extends State<MyDrawer> {
                         padding: const EdgeInsets.all(15),
                         onPressed: () {
                           print("logout button pressed!");
-                          controller.logoutDilog(_authService);
+                          _authService.logoutDilog();
                         },
                         icon: const Icon(Icons.logout_outlined),
                       ),

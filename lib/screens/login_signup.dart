@@ -10,7 +10,6 @@ import 'package:get_it/get_it.dart';
 import 'package:chat_app/constants/others/const.dart';
 import 'package:chat_app/services/auth_services.dart';
 import 'package:chat_app/services/media_services.dart';
-import '../constants/widgets_functions/login_signup_functions.dart';
 
 class LoginSignupScreen extends StatefulWidget {
   const LoginSignupScreen({super.key});
@@ -20,7 +19,7 @@ class LoginSignupScreen extends StatefulWidget {
 }
 
 class _LoginSignupScreenState extends State<LoginSignupScreen> {
-  final c = Get.find<LoginSignupFunctions>();
+  // final c = Get.find<LoginSignupFunctions>();
   late AuthService _authService;
   late MediaServices _mediaServices;
   late StorageService _storageServices;
@@ -49,7 +48,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     _storageServices = GetIt.instance.get<StorageService>();
     _databaseServices = GetIt.instance.get<DatabaseService>();
 
-    _checkLogin();
+    // _checkLogin();
     super.initState();
   }
 
@@ -67,15 +66,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     }
   }
 
-  _checkLogin() async {
-    setState(() {
-      isLoadingCheckLogin = true;
-    });
-    bool result = await c.checkLogin(_authService);
-    setState(() {
-      isLoadingCheckLogin = result;
-    });
-  }
+  // _checkLogin() async {
+  //   setState(() {
+  //     isLoadingCheckLogin = true;
+  //   });
+  // bool result = await _authService.checkLogin();
+  // setState(() {
+  // isLoadingCheckLogin = result;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -360,8 +359,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
         });
 
         try {
-          bool result =
-              await c.saveInfo(email.text, password.text, _authService);
+          bool result = await _authService.signup(email.text, password.text);
           if (result) {
             String? pfpicUrl = await _storageServices.uploadUserPfpic(
               file: selectedImage!,
@@ -439,8 +437,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           isLoadingLogin = true;
         });
 
-        bool result =
-            await c.loginInfo(email.text, password.text, _authService);
+        bool result = await _authService.login(email.text, password.text);
 
         setState(() {
           isLoadingLogin = result;
@@ -458,10 +455,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           isLoadingGoogle = true;
         });
 
-        bool result = await c.handleGoogleSignIn(
+        bool result = await _authService.handleGoogleSignIn(
           _storageServices,
           _databaseServices,
-          _authService,
         );
 
         setState(() {
